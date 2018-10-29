@@ -15,6 +15,9 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/practo/py-queue-factory',
     packages=setuptools.find_packages(),
+    install_requires=[
+       'boto3>=1.9.*',
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
