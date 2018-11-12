@@ -14,6 +14,7 @@ pip install git+https://github.com/practo/py-queue-factory.git@<commit_hash/vers
 ```
 
 ## Usage
+[Refere this for example usage](https://github.com/practo/py-queue-factory/blob/master/example.py)
 Params required `queue_uri`, `host_url` and `subdomain`  
 `queue_uri` is used to decide what type of queue to create (SQS, SQS Local, Beanstalk)  
 `host_url` and `subdomain` is used to decide the actual queue name (staging name/latest is suffixed to queue name)  
@@ -22,21 +23,6 @@ If queue prefix is `prod-subscriptions-`
 queue name is `random-queue`  
 and host url is `https://subscriptions-stag.practodev.com`  
 actual queue name would be `prod-subscriptions-random-queue-stag`  
-```python
-from py_queue_factory import QueueFactory
-
-queue = QueueFactory.get_queue(queue_uri, host_url, subdomain)
-
-# To receive message
-message = queue\
-    .set_queue_name('my-queue-name')\
-    .receive_message()
-
-# To delete message
-queue\
-    .set_queue_name('my-queue-name')\
-    .delete_message(message)
-```
 
 ## Features
 #### SQS
