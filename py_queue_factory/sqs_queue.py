@@ -1,11 +1,14 @@
 import boto3
 import json
+import base64
 import urllib.parse as url_parse
 
 from . import AbstractQueue, QueueMessage
 
+
 class Sqs(AbstractQueue):
-    def __init__(self, uri, host_url, subdomain, endpoint_url=None, client_kwargs={}):
+    def __init__(self, uri, host_url, subdomain, endpoint_url=None,
+                 client_kwargs={}):
         parts = url_parse.urlparse(uri)
         self.scheme = parts.scheme
         aws_access_key_id = parts.username
@@ -31,6 +34,26 @@ class Sqs(AbstractQueue):
         path_parts = list(filter(None, path_parts))
         self.account_id = path_parts[0]
         self.queue_prefix = path_parts[1]
+
+    def do_send_message(self, message, delay, attempt=1):
+        if delay > 900:
+            delay = 900
+        try:
+            json_message = json.dumps(message.get_body()).encode('utf-8')
+            message_body = base64.b64encode(json_message).decode('utf-8')
+            respone = self.sqs_client.send_message(
+                QueueUrl=self.get_queue_url(),
+                MessageBody=message_body,
+                DelaySeconds=delay,
+            )
+            message.set_id(respone['MessageId'])
+        except self.sqs_client.exceptions.QueueDoesNotExist as e:
+            self.create_queue(self.get_queue_name())
+            if attempt < 3:
+                attempt += 1
+                self.do_send_message(message, delay, attempt)
+            else:
+                raise Exception('Could not send message')
 
     def get_queue_url(self):
         return (
@@ -62,9 +85,11 @@ class Sqs(AbstractQueue):
                 )
                 if 'Messages' in result:
                     data = result['Messages'][0]
-                    message = QueueMessage(data['MessageId'], json.loads(data['Body']))
+                    body = base64.b64decode(data['Body'].encode('utf-8'))
+                    message_body = json.loads(body.decode('utf-8'))
+                    message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
-                    break;
+                    break
             except self.sqs_client.exceptions.QueueDoesNotExist as e:
                 self.create_queue(self.get_queue_name())
         return message
