@@ -15,6 +15,7 @@ pip install git+https://github.com/practo/py-queue-factory.git@<commit_hash/vers
 
 ## Usage
 [Refere this for example usage](https://github.com/practo/py-queue-factory/blob/master/example.py)
+
 Params required `queue_uri`, `host_url` and `subdomain`  
 `queue_uri` is used to decide what type of queue to create (SQS, SQS Local, Beanstalk)  
 `host_url` and `subdomain` is used to decide the actual queue name (staging name/latest is suffixed to queue name)  
