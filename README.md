@@ -40,15 +40,21 @@ queue\
 
 ## Features
 #### SQS
-- [ ] Send Message
+- [x] Send Message
 - [x] Receive Message
 - [x] Delete Message
 - [x] Create queue if not exists
+- [x] Configurable visibility timeout
+- [x] Configurable encoding (json/base64)
+- [ ] SQS Spooling
 #### SQS Local
-- [ ] Send Message
+- [x] Send Message
 - [x] Receive Message
 - [x] Delete Message
 - [x] Create queue if not exists
+- [x] Configurable visibility timeout
+- [x] Configurable encoding (json/base64)
+- [ ] SQS Spooling (Don't know if spool-consumer supports aws local)
 #### Beanstalk
 - [ ] Send Message
 - [ ] Receive Message
