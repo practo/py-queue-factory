@@ -1,3 +1,4 @@
+import copy
 from abc import ABC, abstractmethod
 import urllib.parse as url_parse
 
@@ -8,8 +9,15 @@ class AbstractQueue(ABC):
     """
     Queue name on staging or latest will get suffixed with stag name / latest
     Also it will have a prefix as mentioned in the queue uri
-    Ex: prod-subscriptions-
+    Ex:
+    prefix: prod-subscriptions-, queue name: my-queue, stag name(suffix): sub
+    final queue name: prod-subscriptions-my-queue-sub
     """
+
+    SQS_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hrs
+    DEFAULT_VISIBILITY_TIMEOUT = 30  # 30 secs
+    DEFAULT_ENCODING = 'base64'
+    VALID_ENCODING = ['json', 'base64']
 
     def send_message(self, message, delay=0):
         if not isinstance(message, QueueMessage):
@@ -39,10 +47,36 @@ class AbstractQueue(ABC):
 
         return self
 
-    def set_queue_name(self, queue_name):
-        self.queue_name = queue_name
+    def set_queue_properties(self, queue_properties):
+        queue_properties = copy.deepcopy(queue_properties)
+        self.queue_name = queue_properties.pop('name')
+        self.visibility_timeout = queue_properties.pop(
+            'visibility_timeout', self.DEFAULT_VISIBILITY_TIMEOUT)
+        self.encoding = queue_properties.pop(
+            'encoding', self.DEFAULT_ENCODING)
+        self.validate_queue_properties()
+        if queue_properties:
+            raise Exception(f'Unknown queue properties {queue_properties}')
 
         return self
+
+    def validate_queue_properties(self):
+        self.validate_encoding()
+        self.validate_visibility_timeout()
+
+    def validate_encoding(self):
+        if not self.encoding:
+            raise Exception('Encoding is not specified')
+        if self.encoding not in (self.VALID_ENCODING):
+            raise Exception(f'Unknown encoding type, Known types are '
+                            f'{self.VALID_ENCODING} but received '
+                            f'\'{self.encoding}\'')
+
+    def validate_visibility_timeout(self):
+        if self.visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
+            raise Exception(f'visibility_timeout range 0 to '
+                            f'{self.SQS_MAX_VISIBILITY_TIMEOUT}, but received'
+                            f' {self.visibility_timeout}')
 
     def get_queue_name(self):
         """suffixing latest/staging name to queue name"""

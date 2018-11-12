@@ -7,6 +7,9 @@ from . import AbstractQueue, QueueMessage
 
 
 class Sqs(AbstractQueue):
+    RECEIVE_MESSAGE_WAIT_TIME = '20'
+    RECEIVE_MAX_NUMBER_OF_MESSAGES = 1
+
     def __init__(self, uri, host_url, subdomain, endpoint_url=None,
                  client_kwargs={}):
         parts = url_parse.urlparse(uri)
@@ -39,8 +42,7 @@ class Sqs(AbstractQueue):
         if delay > 900:
             delay = 900
         try:
-            json_message = json.dumps(message.get_body()).encode('utf-8')
-            message_body = base64.b64encode(json_message).decode('utf-8')
+            message_body = self.encode_mesage(message.get_body())
             respone = self.sqs_client.send_message(
                 QueueUrl=self.get_queue_url(),
                 MessageBody=message_body,
@@ -71,7 +73,8 @@ class Sqs(AbstractQueue):
         self.sqs_client.create_queue(
             QueueName=queue_name,
             Attributes={
-                'ReceiveMessageWaitTimeSeconds': '20',
+                'ReceiveMessageWaitTimeSeconds': str(self.RECEIVE_MESSAGE_WAIT_TIME),
+                'VisibilityTimeout': str(self.visibility_timeout),
             }
         )
 
@@ -80,16 +83,34 @@ class Sqs(AbstractQueue):
             try:
                 result = self.sqs_client.receive_message(
                     QueueUrl=self.get_queue_url(),
-                    MaxNumberOfMessages=1,
-                    WaitTimeSeconds=20,
+                    MaxNumberOfMessages=self.RECEIVE_MAX_NUMBER_OF_MESSAGES,
+                    WaitTimeSeconds=int(self.RECEIVE_MESSAGE_WAIT_TIME),
+                    VisibilityTimeout=int(self.visibility_timeout),
                 )
                 if 'Messages' in result:
                     data = result['Messages'][0]
-                    body = base64.b64decode(data['Body'].encode('utf-8'))
-                    message_body = json.loads(body.decode('utf-8'))
+                    message_body = self.decode_message(data['Body'])
                     message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
                     break
             except self.sqs_client.exceptions.QueueDoesNotExist as e:
                 self.create_queue(self.get_queue_name())
         return message
+
+    def encode_mesage(self, message_body):
+        if self.encoding == 'json':
+            message_body = json.dumps(message_body)
+        elif self.encoding == 'base64':
+            json_message = json.dumps(message_body).encode('utf-8')
+            message_body = base64.b64encode(json_message).decode('utf-8')
+
+        return message_body
+
+    def decode_message(self, message_body):
+        if self.encoding == 'json':
+            message_body = json.loads(message_body)
+        elif self.encoding == 'base64':
+            message_body = base64.b64decode(message_body.encode('utf-8'))
+            message_body = json.loads(message_body.decode('utf-8'))
+
+        return message_body
