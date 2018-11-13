@@ -15,7 +15,7 @@ class AbstractQueue(ABC):
     """
 
     SQS_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hrs
-    DEFAULT_VISIBILITY_TIMEOUT = 30  # 30 secs
+    DEFAULT_VISIBILITY_TIMEOUT = 60  # 60 secs
     DEFAULT_ENCODING = 'base64'
     VALID_ENCODING = ['json', 'base64']
 

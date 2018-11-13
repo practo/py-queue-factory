@@ -2,7 +2,7 @@ from py_queue_factory import QueueFactory
 
 ACCOUNTS_SIGNUP_QUEUE = {
     'name': 'accounts-signup',
-    'visibility_timeout': 100,  # in secs, default 30 secs
+    'visibility_timeout': 100,  # in secs, default 60 secs
     'encoding': 'json',  # default base64
 }
 
