@@ -37,6 +37,10 @@ class AbstractQueue(ABC):
     def delete_message(self, message):
         pass
 
+    @abstractmethod
+    def change_message_visibility(self, message, visibility_timeout):
+        pass
+
     def set_host_url(self, host_url):
         self.host_url = host_url
 
