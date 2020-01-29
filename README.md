@@ -10,7 +10,9 @@ py-queue-factory is a python library that takes care of creating required queue 
 
 ## Installation
 ```python
-pip install git+https://github.com/practo/py-queue-factory.git@<commit_hash/version>
+pip install git+https://github.com/practo/py-queue-factory.git@<version>
+or
+pip install git+https://github.com/practo/py-queue-factory.git@<version>
 ```
 
 ## Usage
