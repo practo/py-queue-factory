@@ -9,6 +9,7 @@ from . import AbstractQueue, QueueMessage
 class Sqs(AbstractQueue):
     RECEIVE_MESSAGE_WAIT_TIME = '20'
     RECEIVE_MAX_NUMBER_OF_MESSAGES = 1
+    SQS_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hrs
 
     def __init__(self, uri, host_url, subdomain, endpoint_url=None,
                  client_kwargs={}):
@@ -126,3 +127,9 @@ class Sqs(AbstractQueue):
             ReceiptHandle=message.get_receipt_handle(),
             VisibilityTimeout=visibility_timeout
         )
+
+    def validate_visibility_timeout(self):
+        if self.visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
+            raise Exception(f'visibility_timeout range 0 to '
+                            f'{self.SQS_MAX_VISIBILITY_TIMEOUT}, but received'
+                            f' {self.visibility_timeout}')
