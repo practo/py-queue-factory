@@ -14,7 +14,6 @@ class AbstractQueue(ABC):
     final queue name: prod-subscriptions-my-queue-sub
     """
 
-    SQS_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hrs
     DEFAULT_VISIBILITY_TIMEOUT = 60  # 60 secs
     DEFAULT_ENCODING = 'base64'
     VALID_ENCODING = ['json', 'base64']
@@ -35,6 +34,14 @@ class AbstractQueue(ABC):
 
     @abstractmethod
     def delete_message(self, message):
+        pass
+
+    @abstractmethod
+    def change_message_visibility(self, message, visibility_timeout):
+        pass
+
+    @abstractmethod
+    def validate_visibility_timeout(self):
         pass
 
     def set_host_url(self, host_url):
@@ -71,12 +78,6 @@ class AbstractQueue(ABC):
             raise Exception(f'Unknown encoding type, Known types are '
                             f'{self.VALID_ENCODING} but received '
                             f'\'{self.encoding}\'')
-
-    def validate_visibility_timeout(self):
-        if self.visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
-            raise Exception(f'visibility_timeout range 0 to '
-                            f'{self.SQS_MAX_VISIBILITY_TIMEOUT}, but received'
-                            f' {self.visibility_timeout}')
 
     def get_queue_name(self):
         """suffixing latest/staging name to queue name"""

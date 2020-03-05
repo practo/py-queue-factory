@@ -9,6 +9,7 @@ from . import AbstractQueue, QueueMessage
 class Sqs(AbstractQueue):
     RECEIVE_MESSAGE_WAIT_TIME = '20'
     RECEIVE_MAX_NUMBER_OF_MESSAGES = 1
+    SQS_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hrs
 
     def __init__(self, uri, host_url, subdomain, endpoint_url=None,
                  client_kwargs={}):
@@ -78,11 +79,12 @@ class Sqs(AbstractQueue):
             }
         )
 
-    def receive_message(self):
+    def receive_message(self, attribute_names=[]):
         while True:
             try:
                 result = self.sqs_client.receive_message(
                     QueueUrl=self.get_queue_url(),
+                    AttributeNames=attribute_names,
                     MaxNumberOfMessages=self.RECEIVE_MAX_NUMBER_OF_MESSAGES,
                     WaitTimeSeconds=int(self.RECEIVE_MESSAGE_WAIT_TIME),
                     VisibilityTimeout=int(self.visibility_timeout),
@@ -92,6 +94,7 @@ class Sqs(AbstractQueue):
                     message_body = self.decode_message(data['Body'])
                     message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
+                    message.set_attributes(data['Attributes'])
                     break
             except self.sqs_client.exceptions.QueueDoesNotExist as e:
                 self.create_queue(self.get_queue_name())
@@ -114,3 +117,19 @@ class Sqs(AbstractQueue):
             message_body = json.loads(message_body.decode('utf-8'))
 
         return message_body
+
+    def change_message_visibility(self, message, visibility_timeout):
+        if visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
+            visibility_timeout = self.SQS_MAX_VISIBILITY_TIMEOUT
+
+        self.sqs_client.change_message_visibility(
+            QueueUrl=self.get_queue_url(),
+            ReceiptHandle=message.get_receipt_handle(),
+            VisibilityTimeout=visibility_timeout
+        )
+
+    def validate_visibility_timeout(self):
+        if self.visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
+            raise Exception(f'visibility_timeout range 0 to '
+                            f'{self.SQS_MAX_VISIBILITY_TIMEOUT}, but received'
+                            f' {self.visibility_timeout}')
