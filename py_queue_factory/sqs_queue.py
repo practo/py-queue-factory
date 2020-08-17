@@ -94,7 +94,7 @@ class Sqs(AbstractQueue):
                     message_body = self.decode_message(data['Body'])
                     message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
-                    message.set_attributes(data['Attributes'])
+                    message.set_attributes(data.get('Attributes', {}))
                     break
             except self.sqs_client.exceptions.QueueDoesNotExist as e:
                 self.create_queue(self.get_queue_name())
