@@ -3,3 +3,4 @@ from .abstract_queue import *
 from .sqs_queue import *
 from .sqs_local import *
 from .queue_factory import *
+from .beanstalk_queue import *
