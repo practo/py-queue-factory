@@ -52,6 +52,9 @@ class Beanstalk(AbstractQueue):
     def get_queue_url(self):
         return url_parse.urljoin(self.scheme + '://', 'beanstalkd', self.get_queue_name())
 
+    def change_message_visibility(self, message, visibility_timeout):
+        pass
+
     def validate_visibility_timeout(self):
         if self.visibility_timeout > self.BEANSTALK_MAX_VISIBILITY_TIMEOUT:
             raise Exception(f'visibility_timeout range 0 to '
