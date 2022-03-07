@@ -8,7 +8,8 @@ from . import AbstractQueue, QueueMessage
 
 class Beanstalk(AbstractQueue):
 
-    BEANSTALK_MAX_VISIBILITY_TIMEOUT = "30"
+    BEANSTALK_MAX_VISIBILITY_TIMEOUT = 60 * 60 * 12  # 12 hours
+    BEANSTALK_RECEIVE_MESSAGE_WAIT_TIME = 30  # 30 seconds
 
     def __init__(self, uri, host_url, subdomain, default_port=11300):
         parts = url_parse(uri)
@@ -26,7 +27,7 @@ class Beanstalk(AbstractQueue):
         try:
             message_body = self.encode_mesage(message.get_body(), self.encoding)
             self.beanstalk_client.use(self.get_queue_url())
-            respone = self.beanstalk_client.put(message_body, delay=delay)
+            respone = self.beanstalk_client.put(message_body, delay=delay, ttr=self.visibility_timeout)
             message.set_id(respone)
         except:
             if attempt < 3:
@@ -41,7 +42,7 @@ class Beanstalk(AbstractQueue):
 
     def receive_message(self):
         self.beanstalk_client.watch(self.queue_name)
-        result = self.beanstalk_client.reserve(int(self.visibility_timeout))
+        result = self.beanstalk_client.reserve(self.BEANSTALK_RECEIVE_MESSAGE_WAIT_TIME)
         message = QueueMessage(result.jid, result.body)
 
         return message
