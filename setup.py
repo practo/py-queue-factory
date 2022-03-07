@@ -18,6 +18,7 @@ setuptools.setup(
     install_requires=[
        'boto3>=1.7.*',
     ],
+    dependency_links=['https://github.com/practo/beanstalkc.git@v2.0.0'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
