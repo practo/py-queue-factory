@@ -1,4 +1,6 @@
 import copy
+import json
+import base64
 from abc import ABC, abstractmethod
 import urllib.parse as url_parse
 
@@ -87,3 +89,23 @@ class AbstractQueue(ABC):
             self.subdomain, self.queue_name)
 
         return self.queue_prefix + queue_name_with_suffix
+
+    @staticmethod
+    def encode_mesage(message_body, encoding):
+        if encoding == 'json':
+            message_body = json.dumps(message_body)
+        elif encoding == 'base64':
+            json_message = json.dumps(message_body).encode('utf-8')
+            message_body = base64.b64encode(json_message).decode('utf-8')
+
+        return message_body
+
+    @staticmethod
+    def decode_message(message_body, encoding):
+        if encoding == 'json':
+            message_body = json.loads(message_body)
+        elif encoding == 'base64':
+            message_body = base64.b64decode(message_body.encode('utf-8'))
+            message_body = json.loads(message_body.decode('utf-8'))
+
+        return message_body
