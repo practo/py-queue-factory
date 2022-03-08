@@ -12,7 +12,7 @@ class Beanstalk(AbstractQueue):
     BEANSTALK_RECEIVE_MESSAGE_WAIT_TIME = 30  # 30 seconds
 
     def __init__(self, uri, host_url, subdomain, default_port=11300):
-        parts = url_parse(uri)
+        parts = url_parse.urlparse(uri)
         host = parts.hostname
         self.scheme = parts.scheme
         port = parts.port if parts.port else default_port
