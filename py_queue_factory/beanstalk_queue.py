@@ -1,7 +1,7 @@
 import urllib.parse as url_parse
 
-import beanstalkc
-from beanstalkc import Job
+import beanstalkc3
+from beanstalkc3 import Job
 
 from . import AbstractQueue, QueueMessage
 

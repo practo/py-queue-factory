@@ -1,0 +1,2 @@
+boto3>=1.7.*
+beanstalkc3@ git+https://github.com/practo/beanstalkc.git@v2.0.0
