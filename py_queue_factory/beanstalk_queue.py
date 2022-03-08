@@ -19,7 +19,7 @@ class Beanstalk(AbstractQueue):
         self.set_host_url(host_url).set_subdomain(subdomain)
         path_parts = list(filter(None, parts.path.split('/')))
         self.queue_prefix = "/".join(path_parts) if path_parts else ''
-        self.beanstalk_client = beanstalkc.Connection(host=host, port=port)
+        self.beanstalk_client = beanstalkc3.Connection(host=host, port=port)
 
     def do_send_message(self, message, delay, attempt=1):
         if delay > 900:
