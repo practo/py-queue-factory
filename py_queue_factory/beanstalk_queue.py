@@ -25,7 +25,7 @@ class Beanstalk(AbstractQueue):
         if delay > 900:
             delay = 900
         try:
-            message_body = self.encode_mesage(message.get_body(), self.encoding)
+            message_body = AbstractQueue.encode_mesage(message.get_body(), self.encoding)
             self.beanstalk_client.use(self.get_queue_url())
             respone = self.beanstalk_client.put(message_body, delay=delay, ttr=self.visibility_timeout)
             message.set_id(respone)
@@ -41,9 +41,9 @@ class Beanstalk(AbstractQueue):
         job.delete()
 
     def receive_message(self):
-        self.beanstalk_client.watch(self.queue_name)
+        self.beanstalk_client.watch(self.get_queue_url())
         result = self.beanstalk_client.reserve(self.BEANSTALK_RECEIVE_MESSAGE_WAIT_TIME)
-        message = QueueMessage(result.jid, result.body)
+        message = QueueMessage(result.jid, AbstractQueue.decode_message(result.body, self.encoding))
 
         return message
 

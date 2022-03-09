@@ -41,7 +41,7 @@ class Sqs(AbstractQueue):
         if delay > 900:
             delay = 900
         try:
-            message_body = self.encode_mesage(message.get_body(), self.encoding)
+            message_body = AbstractQueue.encode_mesage(message.get_body(), self.encoding)
             respone = self.sqs_client.send_message(
                 QueueUrl=self.get_queue_url(),
                 MessageBody=message_body,
@@ -89,7 +89,7 @@ class Sqs(AbstractQueue):
                 )
                 if 'Messages' in result:
                     data = result['Messages'][0]
-                    message_body = self.decode_message(data['Body'], self.encoding)
+                    message_body = AbstractQueue.decode_message(data['Body'], self.encoding)
                     message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
                     message.set_attributes(data.get('Attributes', {}))
