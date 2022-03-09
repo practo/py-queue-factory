@@ -30,8 +30,6 @@ class Beanstalk(AbstractQueue):
             self.beanstalk_client.use(self.get_queue_name())
             respone = self.beanstalk_client.put(message_body, delay=delay, ttr=self.visibility_timeout)
             message.set_id(respone)
-
-            return message
         except:
             if attempt < 3:
                 attempt += 1

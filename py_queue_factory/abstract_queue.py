@@ -20,13 +20,12 @@ class AbstractQueue(ABC):
     DEFAULT_ENCODING = 'base64'
     VALID_ENCODING = ['json', 'base64']
 
-    def send_message(self, message, delay=0):
+    def send_message(self, message, delay=0, debug=False):
         if not isinstance(message, QueueMessage):
-            # message = self.handle_cid(message)
             message = QueueMessage(message)
         self.do_send_message(message, delay)
-
-        return message
+        if debug:
+            return message
 
     @abstractmethod
     def do_send_message(message, delay):

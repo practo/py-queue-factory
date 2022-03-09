@@ -45,10 +45,10 @@ actual queue name would be `prod-subscriptions-random-queue-stag`
 - [x] Configurable encoding (json/base64)
 - [ ] SQS Spooling (Don't know if spool-consumer supports aws local)
 #### Beanstalk
-- [ ] Send Message
-- [ ] Receive Message
-- [ ] Delete Message
-- [ ] Create queue if not exists
+- [x] Send Message
+- [x] Receive Message
+- [x] Delete Message
+- [x] Create queue if not exists
 
 ## Queue URI Examples:
 ```python
