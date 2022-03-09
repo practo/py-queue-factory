@@ -1,3 +1,4 @@
+import os
 import urllib.parse as url_parse
 
 import beanstalkc3
@@ -26,7 +27,7 @@ class Beanstalk(AbstractQueue):
             delay = 900
         try:
             message_body = AbstractQueue.encode_mesage(message.get_body(), self.encoding)
-            self.beanstalk_client.use(self.get_queue_url())
+            self.beanstalk_client.use(self.get_queue_name())
             respone = self.beanstalk_client.put(message_body, delay=delay, ttr=self.visibility_timeout)
             message.set_id(respone)
 
@@ -43,15 +44,14 @@ class Beanstalk(AbstractQueue):
         job.delete()
 
     def receive_message(self):
-        self.beanstalk_client.watch(self.get_queue_url())
+        self.beanstalk_client.watch(self.get_queue_name())
         result = self.beanstalk_client.reserve(self.BEANSTALK_RECEIVE_MESSAGE_WAIT_TIME)
         message = QueueMessage(result.jid, AbstractQueue.decode_message(result.body, self.encoding))
 
         return message
 
     def get_queue_url(self):
-        return url_parse.urljoin(self.scheme + '://', 'beanstalkd',
-                                 self.get_queue_name())
+        return os.path.join(self.scheme + '://', 'beanstalkd', self.get_queue_name())
 
     def change_message_visibility(self, message, visibility_timeout):
         pass
