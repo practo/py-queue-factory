@@ -26,6 +26,8 @@ class AbstractQueue(ABC):
             message = QueueMessage(message)
         self.do_send_message(message, delay)
 
+        return message
+
     @abstractmethod
     def do_send_message(message, delay):
         pass
