@@ -11,6 +11,7 @@ setuptools.setup(
     author='Anujith Singh',
     author_email='anujith.singh@gmail.com',
     description='Queue factory to work with multiple types of queue',
+    license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/practo/py-queue-factory',
