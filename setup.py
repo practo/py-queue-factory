@@ -17,8 +17,9 @@ setuptools.setup(
     url='https://github.com/practo/py-queue-factory',
     packages=setuptools.find_packages(),
     install_requires=[
-       'boto3>=1.7.*',
-    ],
+           'boto3>=1.7.*',
+           'beanstalkc3 @git+https://github.com/practo/beanstalkc.git@v2.0.0',
+        ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

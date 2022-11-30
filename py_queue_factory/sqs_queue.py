@@ -1,6 +1,4 @@
 import boto3
-import json
-import base64
 import urllib.parse as url_parse
 
 from . import AbstractQueue, QueueMessage
@@ -43,7 +41,7 @@ class Sqs(AbstractQueue):
         if delay > 900:
             delay = 900
         try:
-            message_body = self.encode_mesage(message.get_body())
+            message_body = AbstractQueue.encode_mesage(message.get_body(), self.encoding)
             respone = self.sqs_client.send_message(
                 QueueUrl=self.get_queue_url(),
                 MessageBody=message_body,
@@ -91,7 +89,7 @@ class Sqs(AbstractQueue):
                 )
                 if 'Messages' in result:
                     data = result['Messages'][0]
-                    message_body = self.decode_message(data['Body'])
+                    message_body = AbstractQueue.decode_message(data['Body'], self.encoding)
                     message = QueueMessage(message_body, data['MessageId'])
                     message.set_receipt_handle(data['ReceiptHandle'])
                     message.set_attributes(data.get('Attributes', {}))
@@ -99,24 +97,6 @@ class Sqs(AbstractQueue):
             except self.sqs_client.exceptions.QueueDoesNotExist as e:
                 self.create_queue(self.get_queue_name())
         return message
-
-    def encode_mesage(self, message_body):
-        if self.encoding == 'json':
-            message_body = json.dumps(message_body)
-        elif self.encoding == 'base64':
-            json_message = json.dumps(message_body).encode('utf-8')
-            message_body = base64.b64encode(json_message).decode('utf-8')
-
-        return message_body
-
-    def decode_message(self, message_body):
-        if self.encoding == 'json':
-            message_body = json.loads(message_body)
-        elif self.encoding == 'base64':
-            message_body = base64.b64decode(message_body.encode('utf-8'))
-            message_body = json.loads(message_body.decode('utf-8'))
-
-        return message_body
 
     def change_message_visibility(self, message, visibility_timeout):
         if visibility_timeout > self.SQS_MAX_VISIBILITY_TIMEOUT:
